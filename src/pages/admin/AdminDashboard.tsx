@@ -16,7 +16,7 @@ import AnnouncementManager from "@/components/admin/AnnouncementManager";
 import GalleryManager from "@/components/admin/GalleryManager";
 
 const AdminDashboard = () => {
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -29,21 +29,32 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      console.log("Checking auth, user:", user);
+      // Wait for auth to complete loading
+      if (authLoading) {
+        return;
+      }
+
+      console.log("Checking auth, user:", user?.email);
+      
       if (!user) {
+        console.log("No user found, redirecting to login");
         navigate("/admin/login");
         return;
       }
 
       try {
+        console.log("Checking admin status...");
         const adminStatus = await isAdmin();
-        console.log("Admin status:", adminStatus);
+        console.log("Admin status result:", adminStatus);
+        
         if (adminStatus) {
+          console.log("User is authorized as admin");
           setIsAuthorized(true);
         } else {
+          console.log("User is not an admin");
           toast({
             title: "Access Denied",
-            description: "You don't have admin privileges.",
+            description: "You don't have admin privileges. Please contact the administrator.",
             variant: "destructive",
           });
           navigate("/admin/login");
@@ -52,7 +63,7 @@ const AdminDashboard = () => {
         console.error("Auth check error:", error);
         toast({
           title: "Authorization Error",
-          description: "Failed to verify admin status.",
+          description: "Failed to verify admin status. Please try logging in again.",
           variant: "destructive",
         });
         navigate("/admin/login");
@@ -62,10 +73,11 @@ const AdminDashboard = () => {
     };
 
     checkAuth();
-  }, [user, isAdmin, navigate, toast]);
+  }, [user, authLoading, isAdmin, navigate, toast]);
 
   const handleSignOut = async () => {
     try {
+      console.log("Signing out...");
       await signOut();
       toast({
         title: "Signed Out",
@@ -73,6 +85,7 @@ const AdminDashboard = () => {
       });
       navigate("/admin/login");
     } catch (error) {
+      console.error("Sign out error:", error);
       toast({
         title: "Sign Out Error",
         description: "Failed to sign out. Please try again.",
@@ -81,7 +94,7 @@ const AdminDashboard = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
