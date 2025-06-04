@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,34 +6,27 @@ import AboutSection from "@/components/sections/AboutSection";
 import VisionMissionSection from "@/components/sections/VisionMissionSection";
 import LeadershipSection from "@/components/sections/LeadershipSection";
 import ContactSection from "@/components/sections/ContactSection";
-
 const Home = () => {
-  const quickLinks = [
-    {
-      icon: Megaphone,
-      title: "Latest Announcements",
-      description: "Stay updated with school news and important dates",
-      link: "/announcements",
-      color: "bg-blue-50 hover:bg-blue-100"
-    },
-    {
-      icon: Image,
-      title: "School Life Gallery",
-      description: "Explore our vibrant school community in action",
-      link: "/school-life",
-      color: "bg-green-50 hover:bg-green-100"
-    },
-    {
-      icon: FileText,
-      title: "Learning Materials",
-      description: "Access study materials and resources",
-      link: "/learning-materials",
-      color: "bg-purple-50 hover:bg-purple-100"
-    }
-  ];
-
-  return (
-    <div className="min-h-screen">
+  const quickLinks = [{
+    icon: Megaphone,
+    title: "Latest Announcements",
+    description: "Stay updated with school news and important dates",
+    link: "/announcements",
+    color: "bg-blue-50 hover:bg-blue-100"
+  }, {
+    icon: Image,
+    title: "School Life Gallery",
+    description: "Explore our vibrant school community in action",
+    link: "/school-life",
+    color: "bg-green-50 hover:bg-green-100"
+  }, {
+    icon: FileText,
+    title: "Learning Materials",
+    description: "Access study materials and resources",
+    link: "/learning-materials",
+    color: "bg-purple-50 hover:bg-purple-100"
+  }];
+  return <div className="min-h-screen">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-[#7d0a0a] via-[#8d1515] to-[#6d0808] text-white py-20 lg:py-32">
         <div className="absolute inset-0 bg-black/20"></div>
@@ -54,7 +46,7 @@ const Home = () => {
                 </Button>
               </a>
               <a href="#contact">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-[#7d0a0a]">
+                <Button size="lg" variant="outline" className="border-white hover:bg-white text-red-900">
                   Contact Us
                 </Button>
               </a>
@@ -76,9 +68,8 @@ const Home = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {quickLinks.map((link, index) => {
-              const Icon = link.icon;
-              return (
-                <Link key={index} to={link.link}>
+            const Icon = link.icon;
+            return <Link key={index} to={link.link}>
                   <Card className={`${link.color} border-none transition-all duration-200 hover:scale-105 cursor-pointer`}>
                     <CardContent className="p-6">
                       <div className="flex items-start space-x-4">
@@ -92,9 +83,8 @@ const Home = () => {
                       </div>
                     </CardContent>
                   </Card>
-                </Link>
-              );
-            })}
+                </Link>;
+          })}
           </div>
         </div>
       </section>
@@ -135,8 +125,6 @@ const Home = () => {
           </a>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default Home;
