@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,16 +13,13 @@ import Leadership from "./pages/Leadership";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
+const App = () => <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col bg-white">
+        <div className="">
           <Header />
           <main className="flex-1">
             <Routes>
@@ -41,7 +37,5 @@ const App = () => (
         </div>
       </BrowserRouter>
     </TooltipProvider>
-  </QueryClientProvider>
-);
-
+  </QueryClientProvider>;
 export default App;
