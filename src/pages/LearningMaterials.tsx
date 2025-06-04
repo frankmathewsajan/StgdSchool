@@ -3,86 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, BookOpen, Calculator, Beaker, Globe } from "lucide-react";
+import { useLearningMaterials } from "@/hooks/useLearningMaterials";
 
 const LearningMaterials = () => {
-  // Sample learning materials data
-  const materials = [
-    {
-      id: 1,
-      title: "Mathematics - Class 10 Sample Papers",
-      description: "Comprehensive sample papers for Class 10 Mathematics with solutions and marking scheme",
-      subject: "Mathematics",
-      class: "Class 10",
-      type: "PDF",
-      size: "2.5 MB",
-      uploadDate: "2024-02-20",
-      downloads: 245,
-      icon: Calculator
-    },
-    {
-      id: 2,
-      title: "English Literature Study Guide",
-      description: "Complete study guide covering all prescribed texts for Class 9 English Literature",
-      subject: "English",
-      class: "Class 9",
-      type: "PDF",
-      size: "1.8 MB",
-      uploadDate: "2024-02-18",
-      downloads: 189,
-      icon: BookOpen
-    },
-    {
-      id: 3,
-      title: "Science Laboratory Manual",
-      description: "Practical laboratory manual with detailed experiments for Class 8 Science",
-      subject: "Science",
-      class: "Class 8",
-      type: "PDF",
-      size: "3.2 MB",
-      uploadDate: "2024-02-15",
-      downloads: 156,
-      icon: Beaker
-    },
-    {
-      id: 4,
-      title: "Social Studies Atlas",
-      description: "Interactive atlas with maps and geographical information for Class 7",
-      subject: "Social Studies",
-      class: "Class 7",
-      type: "PDF",
-      size: "5.1 MB",
-      uploadDate: "2024-02-12",
-      downloads: 134,
-      icon: Globe
-    },
-    {
-      id: 5,
-      title: "Hindi Grammar Workbook",
-      description: "Comprehensive grammar exercises and practice questions for Class 6 Hindi",
-      subject: "Hindi",
-      class: "Class 6",
-      type: "PDF",
-      size: "1.9 MB",
-      uploadDate: "2024-02-10",
-      downloads: 167,
-      icon: FileText
-    },
-    {
-      id: 6,
-      title: "Computer Science Programming Guide",
-      description: "Basic programming concepts and exercises for Class 11 Computer Science",
-      subject: "Computer Science",
-      class: "Class 11",
-      type: "PDF",
-      size: "2.8 MB",
-      uploadDate: "2024-02-08",
-      downloads: 198,
-      icon: BookOpen
-    }
-  ];
+  const { data: materials, isLoading, error } = useLearningMaterials();
 
-  const subjects = ["All", "Mathematics", "English", "Science", "Social Studies", "Hindi", "Computer Science"];
-  const classes = ["All", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12"];
+  const getSubjectIcon = (subject: string) => {
+    switch (subject.toLowerCase()) {
+      case "mathematics":
+        return Calculator;
+      case "science":
+        return Beaker;
+      case "social studies":
+        return Globe;
+      default:
+        return BookOpen;
+    }
+  };
 
   const getSubjectColor = (subject: string) => {
     switch (subject) {
@@ -103,6 +40,46 @@ const LearningMaterials = () => {
     }
   };
 
+  const subjects = ["All", ...(materials ? [...new Set(materials.map(m => m.subject))] : [])];
+  const classes = ["All", ...(materials ? [...new Set(materials.map(m => m.class_level))] : [])];
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen py-12">
+        <section className="bg-gradient-to-r from-[#7d0a0a] to-[#5d0808] text-white py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6">Learning Materials</h1>
+            <p className="text-xl text-red-100 max-w-3xl mx-auto">
+              Access a comprehensive collection of study materials, guides, and resources to support your learning journey
+            </p>
+          </div>
+        </section>
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="animate-pulse text-gray-500">Loading learning materials...</div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen py-12">
+        <section className="bg-gradient-to-r from-[#7d0a0a] to-[#5d0808] text-white py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6">Learning Materials</h1>
+          </div>
+        </section>
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-red-500">
+            Failed to load learning materials. Please try again later.
+          </div>
+        </section>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen py-12">
       {/* Hero Section */}
@@ -122,7 +99,7 @@ const LearningMaterials = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
             <Card className="text-center">
               <CardContent className="pt-6">
-                <div className="text-3xl font-bold text-[#7d0a0a] mb-2">{materials.length}</div>
+                <div className="text-3xl font-bold text-[#7d0a0a] mb-2">{materials?.length || 0}</div>
                 <div className="text-gray-600">Total Materials</div>
               </CardContent>
             </Card>
@@ -145,7 +122,7 @@ const LearningMaterials = () => {
             <Card className="text-center">
               <CardContent className="pt-6">
                 <div className="text-3xl font-bold text-[#7d0a0a] mb-2">
-                  {materials.reduce((sum, material) => sum + material.downloads, 0)}
+                  {materials?.reduce((sum, material) => sum + (material.downloads || 0), 0) || 0}
                 </div>
                 <div className="text-gray-600">Total Downloads</div>
               </CardContent>
@@ -154,8 +131,8 @@ const LearningMaterials = () => {
 
           {/* Materials Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {materials.map((material) => {
-              const Icon = material.icon;
+            {materials?.map((material) => {
+              const Icon = getSubjectIcon(material.subject);
               return (
                 <Card key={material.id} className="hover:shadow-lg transition-shadow duration-300">
                   <CardHeader className="pb-3">
@@ -175,22 +152,24 @@ const LearningMaterials = () => {
                       <Badge className={getSubjectColor(material.subject)}>
                         {material.subject}
                       </Badge>
-                      <Badge variant="outline">{material.class}</Badge>
+                      <Badge variant="outline">{material.class_level}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <p className="text-gray-600 text-sm mb-4 leading-relaxed">
-                      {material.description}
-                    </p>
+                    {material.description && (
+                      <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+                        {material.description}
+                      </p>
+                    )}
                     
                     <div className="space-y-2 text-xs text-gray-500 mb-4">
                       <div className="flex justify-between">
-                        <span>Type: {material.type}</span>
-                        <span>Size: {material.size}</span>
+                        <span>Type: {material.file_type}</span>
+                        <span>Size: {material.file_size}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span>Uploaded: {new Date(material.uploadDate).toLocaleDateString()}</span>
-                        <span>Downloads: {material.downloads}</span>
+                        <span>Uploaded: {new Date(material.created_at).toLocaleDateString()}</span>
+                        <span>Downloads: {material.downloads || 0}</span>
                       </div>
                     </div>
 
@@ -205,7 +184,7 @@ const LearningMaterials = () => {
           </div>
 
           {/* Empty State */}
-          {materials.length === 0 && (
+          {!materials || materials.length === 0 && (
             <div className="text-center py-12">
               <div className="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText className="h-12 w-12 text-gray-400" />

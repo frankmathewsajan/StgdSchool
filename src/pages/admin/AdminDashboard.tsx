@@ -1,274 +1,234 @@
 
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Users, 
-  FileText, 
-  Image, 
-  Calendar, 
-  Settings, 
-  LogOut,
-  Plus,
-  Edit,
-  Trash2,
-  Download,
-  Upload
-} from "lucide-react";
+import { LogOut, Users, FileText, Image, Megaphone } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { useAnnouncements } from "@/hooks/useAnnouncements";
+import { useSchoolLife } from "@/hooks/useSchoolLife";
+import { useLearningMaterials } from "@/hooks/useLearningMaterials";
+import { useLeadership } from "@/hooks/useLeadership";
 
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState("overview");
+  const { user, signOut, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const stats = [
-    { title: "Total Students", value: "500", icon: Users, color: "bg-blue-500" },
-    { title: "Announcements", value: "12", icon: Calendar, color: "bg-green-500" },
-    { title: "Learning Materials", value: "45", icon: FileText, color: "bg-purple-500" },
-    { title: "Gallery Images", value: "156", icon: Image, color: "bg-orange-500" },
-  ];
+  const { data: announcements } = useAnnouncements();
+  const { data: gallery } = useSchoolLife();
+  const { data: materials } = useLearningMaterials();
+  const { data: leadership } = useLeadership();
 
-  const recentAnnouncements = [
-    { id: 1, title: "Final Examination Schedule Released", date: "2024-02-28", type: "Academic" },
-    { id: 2, title: "School Holiday - Republic Day", date: "2024-01-25", type: "Holiday" },
-    { id: 3, title: "Parent-Teacher Meeting", date: "2024-02-01", type: "Meeting" },
-  ];
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (!user) {
+        navigate("/admin/login");
+        return;
+      }
 
-  const recentMaterials = [
-    { id: 1, title: "Mathematics - Class 10 Sample Papers", downloads: 245, uploadDate: "2024-02-20" },
-    { id: 2, title: "English Literature Study Guide", downloads: 189, uploadDate: "2024-02-18" },
-    { id: 3, title: "Science Laboratory Manual", downloads: 156, uploadDate: "2024-02-15" },
-  ];
+      try {
+        const adminStatus = await isAdmin();
+        if (adminStatus) {
+          setIsAuthorized(true);
+        } else {
+          toast({
+            title: "Access Denied",
+            description: "You don't have admin privileges.",
+            variant: "destructive",
+          });
+          navigate("/admin/login");
+        }
+      } catch (error) {
+        toast({
+          title: "Authorization Error",
+          description: "Failed to verify admin status.",
+          variant: "destructive",
+        });
+        navigate("/admin/login");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const navigationTabs = [
-    { id: "overview", label: "Overview", icon: Settings },
-    { id: "announcements", label: "Announcements", icon: Calendar },
-    { id: "materials", label: "Learning Materials", icon: FileText },
-    { id: "gallery", label: "Gallery", icon: Image },
-    { id: "leadership", label: "Leadership", icon: Users },
-  ];
+    checkAuth();
+  }, [user, isAdmin, navigate, toast]);
 
-  const renderOverview = () => (
-    <div className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={index}>
-              <CardContent className="flex items-center p-6">
-                <div className={`${stat.color} p-3 rounded-full`}>
-                  <Icon className="h-6 w-6 text-white" />
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm text-gray-600">{stat.title}</p>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Recent Announcements
-              <Button size="sm" className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                <Plus className="h-4 w-4 mr-2" />
-                Add New
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentAnnouncements.map((announcement) => (
-                <div key={announcement.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">{announcement.title}</h4>
-                    <p className="text-sm text-gray-600">{announcement.date}</p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge variant="outline">{announcement.type}</Badge>
-                    <Button size="sm" variant="outline">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              Popular Materials
-              <Button size="sm" className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload New
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentMaterials.map((material) => (
-                <div key={material.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div>
-                    <h4 className="font-medium">{material.title}</h4>
-                    <p className="text-sm text-gray-600">
-                      {material.downloads} downloads • {material.uploadDate}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button size="sm" variant="outline">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case "overview":
-        return renderOverview();
-      case "announcements":
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Manage Announcements</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">Create, edit, and manage school announcements.</p>
-              <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                <Plus className="h-4 w-4 mr-2" />
-                Add New Announcement
-              </Button>
-            </CardContent>
-          </Card>
-        );
-      case "materials":
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Manage Learning Materials</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">Upload and manage educational resources.</p>
-              <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                <Upload className="h-4 w-4 mr-2" />
-                Upload Material
-              </Button>
-            </CardContent>
-          </Card>
-        );
-      case "gallery":
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Manage School Gallery</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">Add and organize school life images.</p>
-              <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Images
-              </Button>
-            </CardContent>
-          </Card>
-        );
-      case "leadership":
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Manage Leadership Team</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">Add and update leadership team information.</p>
-              <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Team Member
-              </Button>
-            </CardContent>
-          </Card>
-        );
-      default:
-        return renderOverview();
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+      navigate("/admin/login");
+    } catch (error) {
+      toast({
+        title: "Sign Out Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7d0a0a] mx-auto mb-4"></div>
+          <p className="text-gray-600">Verifying admin access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null;
+  }
+
+  const stats = [
+    {
+      title: "Announcements",
+      count: announcements?.length || 0,
+      icon: Megaphone,
+      color: "bg-blue-500",
+    },
+    {
+      title: "Gallery Images",
+      count: gallery?.length || 0,
+      icon: Image,
+      color: "bg-green-500",
+    },
+    {
+      title: "Learning Materials",
+      count: materials?.length || 0,
+      icon: FileText,
+      color: "bg-purple-500",
+    },
+    {
+      title: "Leadership Team",
+      count: leadership?.length || 0,
+      icon: Users,
+      color: "bg-orange-500",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-bold text-[#7d0a0a]">Admin Dashboard</h1>
-              <Badge variant="outline">St. G. D. Convent School</Badge>
+          <div className="flex justify-between items-center h-16">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p className="text-sm text-gray-600">St. G. D. Convent School</p>
             </div>
             <div className="flex items-center space-x-4">
-              <Link to="/">
-                <Button variant="outline" size="sm">
-                  View Website
-                </Button>
-              </Link>
-              <Link to="/admin/login">
-                <Button variant="outline" size="sm">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-              </Link>
+              <Badge variant="outline" className="text-[#7d0a0a]">
+                {user?.email}
+              </Badge>
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                size="sm"
+                className="hover:bg-red-50 hover:text-red-600"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Navigation */}
-          <div className="lg:w-64">
-            <Card>
-              <CardContent className="p-4">
-                <nav className="space-y-2">
-                  {navigationTabs.map((tab) => {
-                    const Icon = tab.icon;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                          activeTab === tab.id
-                            ? "bg-[#7d0a0a] text-white"
-                            : "text-gray-700 hover:bg-gray-100"
-                        }`}
-                      >
-                        <Icon className="h-5 w-5" />
-                        <span>{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                </nav>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1">
-            {renderContent()}
-          </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.title}>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stat.count}</p>
+                    </div>
+                    <div className={`${stat.color} p-3 rounded-full`}>
+                      <Icon className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
+
+        {/* Management Tabs */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Content Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="announcements" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="announcements">Announcements</TabsTrigger>
+                <TabsTrigger value="gallery">Gallery</TabsTrigger>
+                <TabsTrigger value="materials">Materials</TabsTrigger>
+                <TabsTrigger value="leadership">Leadership</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="announcements" className="mt-6">
+                <div className="text-center py-8">
+                  <Megaphone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Announcements Management</h3>
+                  <p className="text-gray-600 mb-4">Create, edit, and manage school announcements</p>
+                  <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
+                    Add New Announcement
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="gallery" className="mt-6">
+                <div className="text-center py-8">
+                  <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Gallery Management</h3>
+                  <p className="text-gray-600 mb-4">Upload and manage school life gallery images</p>
+                  <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
+                    Upload New Image
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="materials" className="mt-6">
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Learning Materials</h3>
+                  <p className="text-gray-600 mb-4">Upload and manage study materials and resources</p>
+                  <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
+                    Upload New Material
+                  </Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="leadership" className="mt-6">
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Leadership Team</h3>
+                  <p className="text-gray-600 mb-4">Manage leadership team members and their information</p>
+                  <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
+                    Add Team Member
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

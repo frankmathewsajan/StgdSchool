@@ -9,6 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      announcements: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          id?: string
+          title: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       connected_devices: {
         Row: {
           battery_level: number | null
@@ -220,6 +271,84 @@ export type Database = {
           },
         ]
       }
+      leadership_team: {
+        Row: {
+          bio: string | null
+          created_at: string
+          display_order: number | null
+          email: string | null
+          id: string
+          image_url: string | null
+          name: string
+          phone: string | null
+          position: string
+          qualifications: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number | null
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          phone?: string | null
+          position: string
+          qualifications?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number | null
+          email?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          phone?: string | null
+          position?: string
+          qualifications?: string | null
+        }
+        Relationships: []
+      }
+      learning_materials: {
+        Row: {
+          class_level: string
+          created_at: string
+          description: string | null
+          downloads: number | null
+          file_size: string | null
+          file_type: string
+          file_url: string
+          id: string
+          subject: string
+          title: string
+        }
+        Insert: {
+          class_level: string
+          created_at?: string
+          description?: string | null
+          downloads?: number | null
+          file_size?: string | null
+          file_type: string
+          file_url: string
+          id?: string
+          subject: string
+          title: string
+        }
+        Update: {
+          class_level?: string
+          created_at?: string
+          description?: string | null
+          downloads?: number | null
+          file_size?: string | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          subject?: string
+          title?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string | null
@@ -321,6 +450,36 @@ export type Database = {
             | null
           updated_at?: string | null
           weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      school_life_gallery: {
+        Row: {
+          category: string
+          created_at: string
+          date_taken: string | null
+          description: string | null
+          id: string
+          image_url: string
+          title: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          date_taken?: string | null
+          description?: string | null
+          id?: string
+          image_url: string
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          date_taken?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string
+          title?: string
         }
         Relationships: []
       }

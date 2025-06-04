@@ -3,89 +3,23 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useSchoolLife } from "@/hooks/useSchoolLife";
 
 const SchoolLife = () => {
   const [selectedCategory, setSelectedCategory] = useState("all");
-
-  // Sample gallery data
-  const galleryImages = [
-    {
-      id: 1,
-      src: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=600&h=400",
-      title: "Computer Lab Session",
-      description: "Students engaged in coding and digital literacy programs",
-      category: "academics",
-      date: "2024-02-15"
-    },
-    {
-      id: 2,
-      src: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=600&h=400",
-      title: "Science Laboratory",
-      description: "Hands-on experiments in our well-equipped science lab",
-      category: "academics",
-      date: "2024-02-10"
-    },
-    {
-      id: 3,
-      src: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=600&h=400",
-      title: "Annual Sports Day",
-      description: "Athletes competing in various sports events",
-      category: "sports",
-      date: "2024-01-20"
-    },
-    {
-      id: 4,
-      src: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&h=400",
-      title: "Digital Learning",
-      description: "Modern technology integration in classroom learning",
-      category: "academics",
-      date: "2024-02-08"
-    },
-    {
-      id: 5,
-      src: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=600&h=400",
-      title: "Programming Workshop",
-      description: "Students learning Java programming fundamentals",
-      category: "academics",
-      date: "2024-01-25"
-    },
-    {
-      id: 6,
-      src: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=600&h=400",
-      title: "Study Session",
-      description: "Collaborative learning in our modern library",
-      category: "academics",
-      date: "2024-02-12"
-    },
-    {
-      id: 7,
-      src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=600&h=400",
-      title: "School Campus",
-      description: "Beautiful aerial view of our green campus",
-      category: "campus",
-      date: "2024-01-15"
-    },
-    {
-      id: 8,
-      src: "https://images.unsplash.com/photo-1466442929976-97f336a657be?auto=format&fit=crop&w=600&h=400",
-      title: "Heritage Day Celebration",
-      description: "Cultural diversity celebration at our school",
-      category: "events",
-      date: "2024-01-30"
-    }
-  ];
+  const { data: galleryImages, isLoading, error } = useSchoolLife();
 
   const categories = [
-    { id: "all", label: "All", count: galleryImages.length },
-    { id: "academics", label: "Academics", count: galleryImages.filter(img => img.category === "academics").length },
-    { id: "sports", label: "Sports", count: galleryImages.filter(img => img.category === "sports").length },
-    { id: "events", label: "Events", count: galleryImages.filter(img => img.category === "events").length },
-    { id: "campus", label: "Campus", count: galleryImages.filter(img => img.category === "campus").length },
+    { id: "all", label: "All", count: galleryImages?.length || 0 },
+    { id: "academics", label: "Academics", count: galleryImages?.filter(img => img.category === "academics").length || 0 },
+    { id: "sports", label: "Sports", count: galleryImages?.filter(img => img.category === "sports").length || 0 },
+    { id: "events", label: "Events", count: galleryImages?.filter(img => img.category === "events").length || 0 },
+    { id: "campus", label: "Campus", count: galleryImages?.filter(img => img.category === "campus").length || 0 },
   ];
 
   const filteredImages = selectedCategory === "all" 
-    ? galleryImages 
-    : galleryImages.filter(img => img.category === selectedCategory);
+    ? galleryImages || []
+    : galleryImages?.filter(img => img.category === selectedCategory) || [];
 
   const getCategoryColor = (category: string) => {
     switch (category) {
@@ -101,6 +35,43 @@ const SchoolLife = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen py-12">
+        <section className="bg-gradient-to-r from-[#7d0a0a] to-[#5d0808] text-white py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6">School Life Gallery</h1>
+            <p className="text-xl text-red-100 max-w-3xl mx-auto">
+              Explore the vibrant life at our school through moments captured in our campus, classrooms, and events
+            </p>
+          </div>
+        </section>
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <div className="animate-pulse text-gray-500">Loading gallery...</div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen py-12">
+        <section className="bg-gradient-to-r from-[#7d0a0a] to-[#5d0808] text-white py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 className="text-4xl lg:text-5xl font-bold mb-6">School Life Gallery</h1>
+          </div>
+        </section>
+        <section className="py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-red-500">
+            Failed to load gallery. Please try again later.
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-12">
@@ -144,7 +115,7 @@ const SchoolLife = () => {
               <Card key={image.id} className="overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
                 <div className="relative">
                   <img 
-                    src={image.src} 
+                    src={image.image_url} 
                     alt={image.title}
                     className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -159,16 +130,20 @@ const SchoolLife = () => {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {image.title}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {image.description}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {new Date(image.date).toLocaleDateString('en-US', { 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}
-                  </p>
+                  {image.description && (
+                    <p className="text-gray-600 text-sm mb-3">
+                      {image.description}
+                    </p>
+                  )}
+                  {image.date_taken && (
+                    <p className="text-xs text-gray-500">
+                      {new Date(image.date_taken).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -194,7 +169,7 @@ const SchoolLife = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold mb-2">{galleryImages.length}</div>
+              <div className="text-3xl font-bold mb-2">{galleryImages?.length || 0}</div>
               <div className="text-red-200">Total Photos</div>
             </div>
             <div>
