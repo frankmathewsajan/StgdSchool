@@ -12,6 +12,8 @@ import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { useSchoolLife } from "@/hooks/useSchoolLife";
 import { useLearningMaterials } from "@/hooks/useLearningMaterials";
 import { useLeadership } from "@/hooks/useLeadership";
+import AnnouncementManager from "@/components/admin/AnnouncementManager";
+import GalleryManager from "@/components/admin/GalleryManager";
 
 const AdminDashboard = () => {
   const { user, signOut, isAdmin } = useAuth();
@@ -27,6 +29,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      console.log("Checking auth, user:", user);
       if (!user) {
         navigate("/admin/login");
         return;
@@ -34,6 +37,7 @@ const AdminDashboard = () => {
 
       try {
         const adminStatus = await isAdmin();
+        console.log("Admin status:", adminStatus);
         if (adminStatus) {
           setIsAuthorized(true);
         } else {
@@ -45,6 +49,7 @@ const AdminDashboard = () => {
           navigate("/admin/login");
         }
       } catch (error) {
+        console.error("Auth check error:", error);
         toast({
           title: "Authorization Error",
           description: "Failed to verify admin status.",
@@ -184,25 +189,11 @@ const AdminDashboard = () => {
               </TabsList>
               
               <TabsContent value="announcements" className="mt-6">
-                <div className="text-center py-8">
-                  <Megaphone className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Announcements Management</h3>
-                  <p className="text-gray-600 mb-4">Create, edit, and manage school announcements</p>
-                  <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                    Add New Announcement
-                  </Button>
-                </div>
+                <AnnouncementManager />
               </TabsContent>
               
               <TabsContent value="gallery" className="mt-6">
-                <div className="text-center py-8">
-                  <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Gallery Management</h3>
-                  <p className="text-gray-600 mb-4">Upload and manage school life gallery images</p>
-                  <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                    Upload New Image
-                  </Button>
-                </div>
+                <GalleryManager />
               </TabsContent>
               
               <TabsContent value="materials" className="mt-6">

@@ -25,17 +25,21 @@ const AdminLogin = () => {
     setLoading(true);
     setError("");
 
+    console.log("Attempting login with:", email);
+
     try {
-      const { error } = await signIn(email, password);
+      const { data, error } = await signIn(email, password);
       
       if (error) {
+        console.log("Login error:", error);
         setError(error.message);
         toast({
           title: "Login Failed",
           description: error.message,
           variant: "destructive",
         });
-      } else {
+      } else if (data?.user) {
+        console.log("Login successful:", data.user.email);
         toast({
           title: "Login Successful",
           description: "Welcome to the admin dashboard!",
@@ -43,6 +47,7 @@ const AdminLogin = () => {
         navigate("/admin/dashboard");
       }
     } catch (err) {
+      console.log("Login exception:", err);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -112,7 +117,7 @@ const AdminLogin = () => {
           </form>
           
           <div className="mt-6 text-center text-sm text-gray-600">
-            <p>For demo purposes, contact the school administrator for credentials.</p>
+            <p>For demo purposes, use any valid email/password combo after creating an admin user.</p>
           </div>
         </CardContent>
       </Card>

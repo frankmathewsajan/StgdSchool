@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import Announcements from "./pages/Announcements";
 import SchoolLife from "./pages/SchoolLife";
 import LearningMaterials from "./pages/LearningMaterials";
+import Leadership from "./pages/Leadership";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/announcements" element={<Announcements />} />
               <Route path="/school-life" element={<SchoolLife />} />
               <Route path="/learning-materials" element={<LearningMaterials />} />
+              <Route path="/leadership" element={<Leadership />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="*" element={<NotFound />} />
