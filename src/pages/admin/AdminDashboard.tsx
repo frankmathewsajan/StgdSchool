@@ -8,10 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { LogOut, Users, FileText, Image, Megaphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useAnnouncements } from "@/hooks/useAnnouncements";
-import { useSchoolLife } from "@/hooks/useSchoolLife";
-import { useLearningMaterials } from "@/hooks/useLearningMaterials";
-import { useLeadership } from "@/hooks/useLeadership";
 import AnnouncementManager from "@/components/admin/AnnouncementManager";
 import GalleryManager from "@/components/admin/GalleryManager";
 
@@ -20,11 +16,6 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-
-  const { data: announcements } = useAnnouncements();
-  const { data: gallery } = useSchoolLife();
-  const { data: materials } = useLearningMaterials();
-  const { data: leadership } = useLeadership();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -90,25 +81,25 @@ const AdminDashboard = () => {
   const stats = [
     {
       title: "Announcements",
-      count: announcements?.length || 0,
+      count: 0,
       icon: Megaphone,
       color: "bg-blue-500",
     },
     {
       title: "Gallery Images",
-      count: gallery?.length || 0,
+      count: 0,
       icon: Image,
       color: "bg-green-500",
     },
     {
       title: "Learning Materials",
-      count: materials?.length || 0,
+      count: 0,
       icon: FileText,
       color: "bg-purple-500",
     },
     {
       title: "Leadership Team",
-      count: leadership?.length || 0,
+      count: 0,
       icon: Users,
       color: "bg-orange-500",
     },
