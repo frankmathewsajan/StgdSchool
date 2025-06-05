@@ -36,9 +36,7 @@ const Home = () => {
               Welcome to <br />
               <span className="text-yellow-300">St. G. D. Convent School</span>
             </h1>
-            <p className="text-xl md:text-2xl mb-8 text-red-100 max-w-3xl mx-auto animate-fade-in">
-              Nurturing young minds with quality education, values, and character development since 1985
-            </p>
+            <p className="text-xl md:text-2xl mb-8 text-red-100 max-w-3xl mx-auto animate-fade-in">Nurturing young minds with quality education, values, and character development since 2015</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in">
               <a href="#about">
                 <Button size="lg" className="bg-white text-[#7d0a0a] hover:bg-gray-100">
