@@ -16,6 +16,7 @@ const AnnouncementManager = () => {
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -25,56 +26,75 @@ const AnnouncementManager = () => {
 
   const handleSubmit = async (e: React.FormEvent, id?: string) => {
     e.preventDefault();
+    setLoading(true);
     
     try {
+      console.log("Submitting announcement:", formData);
+      
       if (id) {
         const { error } = await supabase
           .from("announcements")
           .update(formData)
           .eq("id", id);
         
-        if (error) throw error;
+        if (error) {
+          console.error("Update error:", error);
+          throw error;
+        }
         toast({ title: "Announcement updated successfully" });
       } else {
         const { error } = await supabase
           .from("announcements")
           .insert([formData]);
         
-        if (error) throw error;
+        if (error) {
+          console.error("Insert error:", error);
+          throw error;
+        }
         toast({ title: "Announcement created successfully" });
       }
       
       setIsEditing(null);
       setIsCreating(false);
       setFormData({ title: "", content: "", category: "General", type: "info" });
-      refetch();
-    } catch (error) {
+      await refetch();
+    } catch (error: any) {
+      console.error("Save error:", error);
       toast({ 
         title: "Error", 
-        description: "Failed to save announcement", 
+        description: error.message || "Failed to save announcement", 
         variant: "destructive" 
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this announcement?")) return;
     
+    setLoading(true);
     try {
       const { error } = await supabase
         .from("announcements")
         .delete()
         .eq("id", id);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Delete error:", error);
+        throw error;
+      }
       toast({ title: "Announcement deleted successfully" });
-      refetch();
-    } catch (error) {
+      await refetch();
+    } catch (error: any) {
+      console.error("Delete error:", error);
       toast({ 
         title: "Error", 
-        description: "Failed to delete announcement", 
+        description: error.message || "Failed to delete announcement", 
         variant: "destructive" 
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -97,7 +117,7 @@ const AnnouncementManager = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Manage Announcements</h3>
-        <Button onClick={startCreate} className="bg-[#7d0a0a] hover:bg-[#5d0808]">
+        <Button onClick={startCreate} className="bg-[#7d0a0a] hover:bg-[#5d0808]" disabled={loading}>
           <Plus className="h-4 w-4 mr-2" />
           Add Announcement
         </Button>
@@ -116,15 +136,17 @@ const AnnouncementManager = () => {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 required
+                disabled={loading}
               />
               <Textarea
                 placeholder="Content"
                 value={formData.content}
                 onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 required
+                disabled={loading}
               />
               <div className="grid grid-cols-2 gap-4">
-                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })} disabled={loading}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -135,7 +157,7 @@ const AnnouncementManager = () => {
                     <SelectItem value="Events">Events</SelectItem>
                   </SelectContent>
                 </Select>
-                <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+                <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })} disabled={loading}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -148,8 +170,12 @@ const AnnouncementManager = () => {
                 </Select>
               </div>
               <div className="flex space-x-2">
-                <Button type="submit" className="bg-[#7d0a0a] hover:bg-[#5d0808]">Save</Button>
-                <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>Cancel</Button>
+                <Button type="submit" className="bg-[#7d0a0a] hover:bg-[#5d0808]" disabled={loading}>
+                  {loading ? "Saving..." : "Save"}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setIsCreating(false)} disabled={loading}>
+                  Cancel
+                </Button>
               </div>
             </form>
           </CardContent>
@@ -167,14 +193,16 @@ const AnnouncementManager = () => {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
+                    disabled={loading}
                   />
                   <Textarea
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                     required
+                    disabled={loading}
                   />
                   <div className="grid grid-cols-2 gap-4">
-                    <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                    <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })} disabled={loading}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -185,7 +213,7 @@ const AnnouncementManager = () => {
                         <SelectItem value="Events">Events</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })}>
+                    <Select value={formData.type} onValueChange={(value) => setFormData({ ...formData, type: value })} disabled={loading}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -198,8 +226,12 @@ const AnnouncementManager = () => {
                     </Select>
                   </div>
                   <div className="flex space-x-2">
-                    <Button type="submit" className="bg-[#7d0a0a] hover:bg-[#5d0808]">Save</Button>
-                    <Button type="button" variant="outline" onClick={() => setIsEditing(null)}>Cancel</Button>
+                    <Button type="submit" className="bg-[#7d0a0a] hover:bg-[#5d0808]" disabled={loading}>
+                      {loading ? "Saving..." : "Save"}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setIsEditing(null)} disabled={loading}>
+                      Cancel
+                    </Button>
                   </div>
                 </form>
               ) : (
@@ -211,6 +243,7 @@ const AnnouncementManager = () => {
                         size="sm"
                         variant="outline"
                         onClick={() => startEdit(announcement)}
+                        disabled={loading}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -218,6 +251,7 @@ const AnnouncementManager = () => {
                         size="sm"
                         variant="destructive"
                         onClick={() => handleDelete(announcement.id)}
+                        disabled={loading}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

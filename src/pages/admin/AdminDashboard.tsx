@@ -8,14 +8,25 @@ import { Badge } from "@/components/ui/badge";
 import { LogOut, Users, FileText, Image, Megaphone } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useAnnouncements } from "@/hooks/useAnnouncements";
+import { useSchoolLife } from "@/hooks/useSchoolLife";
+import { useLearningMaterials } from "@/hooks/useLearningMaterials";
+import { useLeadership } from "@/hooks/useLeadership";
 import AnnouncementManager from "@/components/admin/AnnouncementManager";
 import GalleryManager from "@/components/admin/GalleryManager";
+import LearningMaterialsManager from "@/components/admin/LearningMaterialsManager";
+import LeadershipManager from "@/components/admin/LeadershipManager";
 
 const AdminDashboard = () => {
   const { isAuthenticated, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+
+  const { data: announcements } = useAnnouncements();
+  const { data: gallery } = useSchoolLife();
+  const { data: materials } = useLearningMaterials();
+  const { data: leadership } = useLeadership();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -81,25 +92,25 @@ const AdminDashboard = () => {
   const stats = [
     {
       title: "Announcements",
-      count: 0,
+      count: announcements?.length || 0,
       icon: Megaphone,
       color: "bg-blue-500",
     },
     {
       title: "Gallery Images",
-      count: 0,
+      count: gallery?.length || 0,
       icon: Image,
       color: "bg-green-500",
     },
     {
       title: "Learning Materials",
-      count: 0,
+      count: materials?.length || 0,
       icon: FileText,
       color: "bg-purple-500",
     },
     {
       title: "Leadership Team",
-      count: 0,
+      count: leadership?.length || 0,
       icon: Users,
       color: "bg-orange-500",
     },
@@ -179,25 +190,11 @@ const AdminDashboard = () => {
               </TabsContent>
               
               <TabsContent value="materials" className="mt-6">
-                <div className="text-center py-8">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Learning Materials</h3>
-                  <p className="text-gray-600 mb-4">Upload and manage study materials and resources</p>
-                  <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                    Upload New Material
-                  </Button>
-                </div>
+                <LearningMaterialsManager />
               </TabsContent>
               
               <TabsContent value="leadership" className="mt-6">
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Leadership Team</h3>
-                  <p className="text-gray-600 mb-4">Manage leadership team members and their information</p>
-                  <Button className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-                    Add Team Member
-                  </Button>
-                </div>
+                <LeadershipManager />
               </TabsContent>
             </Tabs>
           </CardContent>
