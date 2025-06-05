@@ -88,7 +88,8 @@ const Footer = () => {
                 Academic City, AC 12345
               </p>
               <p>
-                <strong className="text-white">Phone:</strong><br />
+                <strong className="text-white">Address:
+Siroli, Road Dhanouli, Agra, Uttar Pradesh</strong><br />
                 +1 (555) 123-4567
               </p>
               <p>
@@ -100,7 +101,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-red-800 mt-8 pt-8 text-center text-red-200">
-          <p>© 2025 St. G. D. Convent School. All rights reserved.</p>
+          <p>&copy; 2024 St. G. D. Convent School. All rights reserved.</p>
         </div>
       </div>
     </footer>;
