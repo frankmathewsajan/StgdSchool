@@ -29,29 +29,34 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      console.log("Dashboard - checking auth, authLoading:", authLoading, "user:", user?.email);
+      
       // Wait for auth to complete loading
       if (authLoading) {
+        console.log("Dashboard - still loading auth...");
         return;
       }
 
-      console.log("Checking auth, user:", user?.email);
-      
       if (!user) {
-        console.log("No user found, redirecting to login");
+        console.log("Dashboard - no user found, redirecting to login");
         navigate("/admin/login");
         return;
       }
 
       try {
-        console.log("Checking admin status...");
+        console.log("Dashboard - checking admin status...");
         const adminStatus = await isAdmin();
-        console.log("Admin status result:", adminStatus);
+        console.log("Dashboard - admin status result:", adminStatus);
         
         if (adminStatus) {
-          console.log("User is authorized as admin");
+          console.log("Dashboard - user is authorized as admin");
           setIsAuthorized(true);
+          toast({
+            title: "Welcome to Admin Dashboard",
+            description: `Logged in as ${user.email}`,
+          });
         } else {
-          console.log("User is not an admin");
+          console.log("Dashboard - user is not an admin");
           toast({
             title: "Access Denied",
             description: "You don't have admin privileges. Please contact the administrator.",
@@ -60,7 +65,7 @@ const AdminDashboard = () => {
           navigate("/admin/login");
         }
       } catch (error) {
-        console.error("Auth check error:", error);
+        console.error("Dashboard - auth check error:", error);
         toast({
           title: "Authorization Error",
           description: "Failed to verify admin status. Please try logging in again.",
@@ -77,7 +82,7 @@ const AdminDashboard = () => {
 
   const handleSignOut = async () => {
     try {
-      console.log("Signing out...");
+      console.log("Dashboard - signing out...");
       await signOut();
       toast({
         title: "Signed Out",
@@ -85,7 +90,7 @@ const AdminDashboard = () => {
       });
       navigate("/admin/login");
     } catch (error) {
-      console.error("Sign out error:", error);
+      console.error("Dashboard - sign out error:", error);
       toast({
         title: "Sign Out Error",
         description: "Failed to sign out. Please try again.",

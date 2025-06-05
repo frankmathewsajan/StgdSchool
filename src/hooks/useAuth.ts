@@ -84,26 +84,23 @@ export const useAuth = () => {
     console.log("Checking admin status for user:", user.id);
     
     try {
+      // Use the service role or ensure RLS allows this check
       const { data, error } = await supabase
         .from("admin_users")
         .select("id")
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
       
       console.log("Admin check result:", { data, error });
       
       if (error) {
-        if (error.code === 'PGRST116') {
-          // No rows returned - user is not an admin
-          console.log("User is not an admin");
-          return false;
-        }
         console.log("Admin check error:", error.message);
         return false;
       }
       
-      console.log("User is an admin");
-      return !!data;
+      const isAdminUser = !!data;
+      console.log("User is admin:", isAdminUser);
+      return isAdminUser;
     } catch (error) {
       console.log("Admin check exception:", error);
       return false;
