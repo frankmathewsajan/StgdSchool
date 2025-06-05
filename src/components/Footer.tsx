@@ -1,26 +1,44 @@
-
 import { Link } from "react-router-dom";
 import { GraduationCap, Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react";
-
 const Footer = () => {
-  const quickLinks = [
-    { name: "Home", path: "/" },
-    { name: "About Us", path: "/about" },
-    { name: "Vision & Mission", path: "/vision-mission" },
-    { name: "Leadership", path: "/leadership" },
-    { name: "Contact Us", path: "/contact" },
-  ];
-
-  const socialIcons = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Youtube, href: "#", label: "YouTube" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
-  ];
-
-  return (
-    <footer className="bg-[#7d0a0a] text-white">
+  const quickLinks = [{
+    name: "Home",
+    path: "/"
+  }, {
+    name: "About Us",
+    path: "/about"
+  }, {
+    name: "Vision & Mission",
+    path: "/vision-mission"
+  }, {
+    name: "Leadership",
+    path: "/leadership"
+  }, {
+    name: "Contact Us",
+    path: "/contact"
+  }];
+  const socialIcons = [{
+    icon: Facebook,
+    href: "#",
+    label: "Facebook"
+  }, {
+    icon: Instagram,
+    href: "#",
+    label: "Instagram"
+  }, {
+    icon: Twitter,
+    href: "#",
+    label: "Twitter"
+  }, {
+    icon: Youtube,
+    href: "#",
+    label: "YouTube"
+  }, {
+    icon: Linkedin,
+    href: "#",
+    label: "LinkedIn"
+  }];
+  return <footer className="bg-[#7d0a0a] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* School Info */}
@@ -39,19 +57,12 @@ const Footer = () => {
               Building tomorrow's leaders through innovative teaching and holistic development.
             </p>
             <div className="flex space-x-4">
-              {socialIcons.map((social) => {
-                const Icon = social.icon;
-                return (
-                  <a
-                    key={social.label}
-                    href={social.href}
-                    className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors"
-                    aria-label={social.label}
-                  >
+              {socialIcons.map(social => {
+              const Icon = social.icon;
+              return <a key={social.label} href={social.href} className="bg-white/10 p-2 rounded-full hover:bg-white/20 transition-colors" aria-label={social.label}>
                     <Icon className="h-5 w-5" />
-                  </a>
-                );
-              })}
+                  </a>;
+            })}
             </div>
           </div>
 
@@ -59,16 +70,11 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    to={link.path}
-                    className="text-red-200 hover:text-white transition-colors"
-                  >
+              {quickLinks.map(link => <li key={link.name}>
+                  <Link to={link.path} className="text-red-200 hover:text-white transition-colors">
                     {link.name}
                   </Link>
-                </li>
-              ))}
+                </li>)}
             </ul>
           </div>
 
@@ -94,11 +100,9 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-red-800 mt-8 pt-8 text-center text-red-200">
-          <p>&copy; 2024 St. G. D. Convent School. All rights reserved.</p>
+          <p>© 2025 St. G. D. Convent School. All rights reserved.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
