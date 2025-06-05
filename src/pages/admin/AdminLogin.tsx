@@ -6,38 +6,36 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { GraduationCap, LogIn, UserPlus } from "lucide-react";
+import { GraduationCap, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("admin@stgdconvent.edu");
-  const [password, setPassword] = useState("admin123456");
+  const [passkey, setPasskey] = useState("");
   const [loading, setLoading] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
   
-  const { signIn, createAdminUser, user, loading: authLoading } = useAuth();
+  const { signIn, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (!authLoading && user) {
-      console.log("User already authenticated, redirecting to dashboard");
+    if (!authLoading && isAuthenticated) {
+      console.log("Admin already authenticated, redirecting to dashboard");
       navigate("/admin/dashboard");
     }
-  }, [user, authLoading, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    console.log("Attempting login with:", email);
+    console.log("Attempting login with passkey");
 
     try {
-      const { data, error } = await signIn(email, password);
+      const { success, error } = await signIn(passkey);
       
       if (error) {
         console.log("Login error:", error);
@@ -47,47 +45,19 @@ const AdminLogin = () => {
           description: error.message,
           variant: "destructive",
         });
-      } else if (data?.user) {
-        console.log("Login successful:", data.user.email);
+      } else if (success) {
+        console.log("Login successful");
         toast({
           title: "Login Successful",
           description: "Welcome to the admin dashboard!",
         });
-        // Navigation will be handled by the useEffect above
+        navigate("/admin/dashboard");
       }
     } catch (err) {
       console.log("Login exception:", err);
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleCreateAdmin = async () => {
-    setCreating(true);
-    setError("");
-
-    try {
-      const { data, error } = await createAdminUser(email, password);
-      
-      if (error) {
-        setError(error.message);
-        toast({
-          title: "Admin Creation Failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Admin Created Successfully",
-          description: "Admin user created. You can now sign in.",
-        });
-      }
-    } catch (err) {
-      console.log("Create admin exception:", err);
-      setError("Failed to create admin user.");
-    } finally {
-      setCreating(false);
     }
   };
 
@@ -124,26 +94,13 @@ const AdminLogin = () => {
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="passkey">Admin Passkey</Label>
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
+                id="passkey"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                value={passkey}
+                onChange={(e) => setPasskey(e.target.value)}
+                placeholder="Enter admin passkey"
                 required
                 className="mt-1"
               />
@@ -165,31 +122,12 @@ const AdminLogin = () => {
             </Button>
           </form>
           
-          <div className="mt-4">
-            <Button
-              onClick={handleCreateAdmin}
-              variant="outline"
-              className="w-full"
-              disabled={creating}
-            >
-              {creating ? (
-                "Creating Admin..."
-              ) : (
-                <>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Create Admin User
-                </>
-              )}
-            </Button>
-          </div>
-          
           <div className="mt-6 text-center text-sm text-gray-600">
             <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="font-semibold mb-2">Demo Credentials:</p>
-              <p>Email: admin@stgdconvent.edu</p>
-              <p>Password: admin123456</p>
+              <p className="font-semibold mb-2">Admin Passkey:</p>
+              <p className="font-mono text-lg">143143</p>
               <p className="text-xs mt-2 text-gray-500">
-                Use "Create Admin User" if this is your first time.
+                Enter this passkey to access the admin dashboard.
               </p>
             </div>
           </div>

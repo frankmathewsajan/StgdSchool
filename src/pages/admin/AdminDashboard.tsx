@@ -16,10 +16,9 @@ import AnnouncementManager from "@/components/admin/AnnouncementManager";
 import GalleryManager from "@/components/admin/GalleryManager";
 
 const AdminDashboard = () => {
-  const { user, signOut, isAdmin, loading: authLoading } = useAuth();
+  const { isAuthenticated, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const { data: announcements } = useAnnouncements();
@@ -29,7 +28,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      console.log("Dashboard - checking auth, authLoading:", authLoading, "user:", user?.email);
+      console.log("Dashboard - checking auth, authLoading:", authLoading, "isAuthenticated:", isAuthenticated);
       
       // Wait for auth to complete loading
       if (authLoading) {
@@ -37,48 +36,22 @@ const AdminDashboard = () => {
         return;
       }
 
-      if (!user) {
-        console.log("Dashboard - no user found, redirecting to login");
+      if (!isAuthenticated) {
+        console.log("Dashboard - user not authenticated, redirecting to login");
         navigate("/admin/login");
         return;
       }
 
-      try {
-        console.log("Dashboard - checking admin status...");
-        const adminStatus = await isAdmin();
-        console.log("Dashboard - admin status result:", adminStatus);
-        
-        if (adminStatus) {
-          console.log("Dashboard - user is authorized as admin");
-          setIsAuthorized(true);
-          toast({
-            title: "Welcome to Admin Dashboard",
-            description: `Logged in as ${user.email}`,
-          });
-        } else {
-          console.log("Dashboard - user is not an admin");
-          toast({
-            title: "Access Denied",
-            description: "You don't have admin privileges. Please contact the administrator.",
-            variant: "destructive",
-          });
-          navigate("/admin/login");
-        }
-      } catch (error) {
-        console.error("Dashboard - auth check error:", error);
-        toast({
-          title: "Authorization Error",
-          description: "Failed to verify admin status. Please try logging in again.",
-          variant: "destructive",
-        });
-        navigate("/admin/login");
-      } finally {
-        setLoading(false);
-      }
+      console.log("Dashboard - user is authenticated");
+      toast({
+        title: "Welcome to Admin Dashboard",
+        description: "You are now logged in as admin",
+      });
+      setLoading(false);
     };
 
     checkAuth();
-  }, [user, authLoading, isAdmin, navigate, toast]);
+  }, [isAuthenticated, authLoading, navigate, toast]);
 
   const handleSignOut = async () => {
     try {
@@ -104,13 +77,13 @@ const AdminDashboard = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7d0a0a] mx-auto mb-4"></div>
-          <p className="text-gray-600">Verifying admin access...</p>
+          <p className="text-gray-600">Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (!isAuthorized) {
+  if (!isAuthenticated) {
     return null;
   }
 
@@ -153,7 +126,7 @@ const AdminDashboard = () => {
             </div>
             <div className="flex items-center space-x-4">
               <Badge variant="outline" className="text-[#7d0a0a]">
-                {user?.email}
+                Admin User
               </Badge>
               <Button
                 onClick={handleSignOut}
