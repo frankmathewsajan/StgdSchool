@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Users, FileText, Image, Megaphone } from "lucide-react";
+import { LogOut, Users, FileText, Image, Megaphone, Mail } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
@@ -18,7 +18,7 @@ import LearningMaterialsManager from "@/components/admin/LearningMaterialsManage
 import LeadershipManager from "@/components/admin/LeadershipManager";
 
 const AdminDashboard = () => {
-  const { isAuthenticated, signOut, loading: authLoading } = useAuth();
+  const { isAuthenticated, user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -127,6 +127,12 @@ const AdminDashboard = () => {
               <p className="text-sm text-gray-600">St. G. D. Convent School</p>
             </div>
             <div className="flex items-center space-x-4">
+              {user && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-700">{user.email}</span>
+                </div>
+              )}
               <Badge variant="outline" className="text-[#7d0a0a]">
                 Admin User
               </Badge>
