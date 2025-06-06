@@ -5,9 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, User, Mail, Phone } from "lucide-react";
+import { Plus, Edit, Trash2, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useLeadership } from "@/hooks/useLeadership";
@@ -54,12 +52,7 @@ const LeadershipManager = () => {
 
       const dataToSave = {
         ...formData,
-        bio: formData.bio || null,
-        qualifications: formData.qualifications || null,
-        email: formData.email || null,
-        phone: formData.phone || null,
-        image_url: formData.image_url || null,
-        display_order: formData.display_order || 0
+        display_order: parseInt(formData.display_order.toString()) || 0
       };
 
       if (editingId) {
@@ -173,7 +166,7 @@ const LeadershipManager = () => {
                   id="position"
                   value={formData.position}
                   onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                  placeholder="Enter position/role"
+                  placeholder="Enter position"
                   required
                 />
               </div>
@@ -229,7 +222,7 @@ const LeadershipManager = () => {
                 id="qualifications"
                 value={formData.qualifications}
                 onChange={(e) => setFormData({ ...formData, qualifications: e.target.value })}
-                placeholder="Enter qualifications and credentials"
+                placeholder="Enter qualifications"
                 rows={2}
               />
             </div>
@@ -240,7 +233,7 @@ const LeadershipManager = () => {
                 id="bio"
                 value={formData.bio}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                placeholder="Enter biography and background"
+                placeholder="Enter biography"
                 rows={4}
               />
             </div>
@@ -266,70 +259,26 @@ const LeadershipManager = () => {
         </CardHeader>
         <CardContent>
           {leadership.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No leadership members found.</p>
+            <p className="text-gray-500 text-center py-8">No leadership members found.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Position</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Order</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leadership.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        {member.image_url ? (
-                          <img
-                            src={member.image_url}
-                            alt={member.name}
-                            className="w-10 h-10 rounded-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = "/placeholder.svg";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <User className="h-5 w-5 text-gray-500" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-medium">{member.name}</div>
-                          {member.qualifications && (
-                            <div className="text-sm text-gray-500">{member.qualifications}</div>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{member.position}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-1">
-                        {member.email && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Mail className="h-3 w-3" />
-                            {member.email}
-                          </div>
-                        )}
-                        {member.phone && (
-                          <div className="flex items-center gap-1 text-sm">
-                            <Phone className="h-3 w-3" />
-                            {member.phone}
-                          </div>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{member.display_order}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {leadership.map((member) => (
+                <Card key={member.id} className="overflow-hidden">
+                  <div className="aspect-video relative">
+                    <img
+                      src={member.image_url || "/placeholder.svg"}
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.svg";
+                      }}
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <User className="h-5 w-5 text-blue-500" />
+                      <div className="flex gap-1">
                         <Button
                           size="sm"
                           variant="outline"
@@ -345,11 +294,23 @@ const LeadershipManager = () => {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                    </div>
+                    <h3 className="font-semibold mb-1">{member.name}</h3>
+                    <p className="text-sm text-blue-600 mb-2">{member.position}</p>
+                    {member.bio && (
+                      <p className="text-xs text-gray-600 mb-2 line-clamp-3">
+                        {member.bio}
+                      </p>
+                    )}
+                    <div className="text-xs text-gray-500 space-y-1">
+                      {member.email && <p>Email: {member.email}</p>}
+                      {member.phone && <p>Phone: {member.phone}</p>}
+                      <p>Order: {member.display_order}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

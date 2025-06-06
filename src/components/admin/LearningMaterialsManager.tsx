@@ -5,10 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Download, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useLearningMaterials } from "@/hooks/useLearningMaterials";
@@ -20,11 +17,11 @@ const LearningMaterialsManager = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    file_url: "",
-    file_type: "pdf",
-    file_size: "",
+    subject: "",
     class_level: "",
-    subject: ""
+    file_type: "",
+    file_size: "",
+    file_url: ""
   });
 
   const { toast } = useToast();
@@ -35,11 +32,11 @@ const LearningMaterialsManager = () => {
     setFormData({
       title: "",
       description: "",
-      file_url: "",
-      file_type: "pdf",
-      file_size: "",
+      subject: "",
       class_level: "",
-      subject: ""
+      file_type: "",
+      file_size: "",
+      file_url: ""
     });
     setEditingId(null);
   };
@@ -72,7 +69,7 @@ const LearningMaterialsManager = () => {
 
         toast({
           title: "Success",
-          description: "Learning material added successfully",
+          description: "Learning material created successfully",
         });
       }
 
@@ -95,11 +92,11 @@ const LearningMaterialsManager = () => {
     setFormData({
       title: material.title,
       description: material.description || "",
-      file_url: material.file_url,
+      subject: material.subject,
+      class_level: material.class_level,
       file_type: material.file_type,
       file_size: material.file_size || "",
-      class_level: material.class_level,
-      subject: material.subject
+      file_url: material.file_url
     });
     setEditingId(material.id);
   };
@@ -167,75 +164,49 @@ const LearningMaterialsManager = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="class_level">Class Level</Label>
-                <Select
+                <Input
+                  id="class_level"
                   value={formData.class_level}
-                  onValueChange={(value) => setFormData({ ...formData, class_level: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select class" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Nursery">Nursery</SelectItem>
-                    <SelectItem value="LKG">LKG</SelectItem>
-                    <SelectItem value="UKG">UKG</SelectItem>
-                    <SelectItem value="Class 1">Class 1</SelectItem>
-                    <SelectItem value="Class 2">Class 2</SelectItem>
-                    <SelectItem value="Class 3">Class 3</SelectItem>
-                    <SelectItem value="Class 4">Class 4</SelectItem>
-                    <SelectItem value="Class 5">Class 5</SelectItem>
-                    <SelectItem value="Class 6">Class 6</SelectItem>
-                    <SelectItem value="Class 7">Class 7</SelectItem>
-                    <SelectItem value="Class 8">Class 8</SelectItem>
-                    <SelectItem value="Class 9">Class 9</SelectItem>
-                    <SelectItem value="Class 10">Class 10</SelectItem>
-                    <SelectItem value="Class 11">Class 11</SelectItem>
-                    <SelectItem value="Class 12">Class 12</SelectItem>
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => setFormData({ ...formData, class_level: e.target.value })}
+                  placeholder="Enter class level"
+                  required
+                />
               </div>
               <div>
                 <Label htmlFor="file_type">File Type</Label>
-                <Select
+                <Input
+                  id="file_type"
                   value={formData.file_type}
-                  onValueChange={(value) => setFormData({ ...formData, file_type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select file type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pdf">PDF</SelectItem>
-                    <SelectItem value="doc">DOC</SelectItem>
-                    <SelectItem value="docx">DOCX</SelectItem>
-                    <SelectItem value="ppt">PPT</SelectItem>
-                    <SelectItem value="pptx">PPTX</SelectItem>
-                    <SelectItem value="xls">XLS</SelectItem>
-                    <SelectItem value="xlsx">XLSX</SelectItem>
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => setFormData({ ...formData, file_type: e.target.value })}
+                  placeholder="Enter file type (PDF, DOC, etc.)"
+                  required
+                />
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="file_size">File Size</Label>
                 <Input
                   id="file_size"
                   value={formData.file_size}
                   onChange={(e) => setFormData({ ...formData, file_size: e.target.value })}
-                  placeholder="e.g., 2.5 MB"
+                  placeholder="Enter file size (e.g., 2.5 MB)"
                 />
               </div>
-            </div>
-
-            <div>
-              <Label htmlFor="file_url">File URL</Label>
-              <Input
-                id="file_url"
-                value={formData.file_url}
-                onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
-                placeholder="Enter file URL"
-                required
-              />
+              <div>
+                <Label htmlFor="file_url">File URL</Label>
+                <Input
+                  id="file_url"
+                  value={formData.file_url}
+                  onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
+                  placeholder="Enter file download URL"
+                  required
+                />
+              </div>
             </div>
 
             <div>
@@ -251,7 +222,7 @@ const LearningMaterialsManager = () => {
 
             <div className="flex gap-2">
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Saving..." : editingId ? "Update" : "Add"} Material
+                {isLoading ? "Saving..." : editingId ? "Update" : "Create"} Material
               </Button>
               {editingId && (
                 <Button type="button" variant="outline" onClick={resetForm}>
@@ -270,67 +241,42 @@ const LearningMaterialsManager = () => {
         </CardHeader>
         <CardContent>
           {materials.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No learning materials found.</p>
+            <p className="text-gray-500 text-center py-8">No learning materials found.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Subject</TableHead>
-                  <TableHead>Class</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Size</TableHead>
-                  <TableHead>Downloads</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {materials.map((material) => (
-                  <TableRow key={material.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4" />
-                        {material.title}
-                      </div>
-                    </TableCell>
-                    <TableCell>{material.subject}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{material.class_level}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge>{material.file_type.toUpperCase()}</Badge>
-                    </TableCell>
-                    <TableCell>{material.file_size || "N/A"}</TableCell>
-                    <TableCell>{material.downloads || 0}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => window.open(material.file_url, '_blank')}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(material)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(material.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {materials.map((material) => (
+                <Card key={material.id} className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <FileText className="h-5 w-5 text-blue-500" />
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(material)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDelete(material.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <h3 className="font-semibold mb-2">{material.title}</h3>
+                  <p className="text-sm text-gray-600 mb-2">{material.description}</p>
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p>Subject: {material.subject}</p>
+                    <p>Class: {material.class_level}</p>
+                    <p>Type: {material.file_type}</p>
+                    {material.file_size && <p>Size: {material.file_size}</p>}
+                    <p>Downloads: {material.downloads || 0}</p>
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

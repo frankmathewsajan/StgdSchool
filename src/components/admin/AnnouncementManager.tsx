@@ -6,9 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Megaphone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
@@ -20,8 +18,8 @@ const AnnouncementManager = () => {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    category: "General",
-    type: "info"
+    type: "info",
+    category: "General"
   });
 
   const { toast } = useToast();
@@ -32,8 +30,8 @@ const AnnouncementManager = () => {
     setFormData({
       title: "",
       content: "",
-      category: "General",
-      type: "info"
+      type: "info",
+      category: "General"
     });
     setEditingId(null);
   };
@@ -46,7 +44,6 @@ const AnnouncementManager = () => {
       console.log("Submitting announcement:", formData);
 
       if (editingId) {
-        // Update existing announcement
         const { error } = await supabase
           .from("announcements")
           .update(formData)
@@ -59,7 +56,6 @@ const AnnouncementManager = () => {
           description: "Announcement updated successfully",
         });
       } else {
-        // Create new announcement
         const { error } = await supabase
           .from("announcements")
           .insert([formData]);
@@ -67,7 +63,7 @@ const AnnouncementManager = () => {
         if (error) throw error;
 
         toast({
-          title: "Success",
+          title: "Success", 
           description: "Announcement created successfully",
         });
       }
@@ -91,8 +87,8 @@ const AnnouncementManager = () => {
     setFormData({
       title: announcement.title,
       content: announcement.content,
-      category: announcement.category,
-      type: announcement.type
+      type: announcement.type,
+      category: announcement.category
     });
     setEditingId(announcement.id);
   };
@@ -150,42 +146,32 @@ const AnnouncementManager = () => {
               </div>
               <div>
                 <Label htmlFor="category">Category</Label>
-                <Select
+                <Input
+                  id="category"
                   value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="General">General</SelectItem>
-                    <SelectItem value="Academic">Academic</SelectItem>
-                    <SelectItem value="Events">Events</SelectItem>
-                    <SelectItem value="Sports">Sports</SelectItem>
-                    <SelectItem value="Holidays">Holidays</SelectItem>
-                  </SelectContent>
-                </Select>
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  placeholder="Enter category"
+                />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="type">Type</Label>
-                <Select
-                  value={formData.type}
-                  onValueChange={(value) => setFormData({ ...formData, type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="info">Info</SelectItem>
-                    <SelectItem value="warning">Warning</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                    <SelectItem value="holiday">Holiday</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="type">Type</Label>
+              <Select
+                value={formData.type}
+                onValueChange={(value) => setFormData({ ...formData, type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="info">Information</SelectItem>
+                  <SelectItem value="important">Important</SelectItem>
+                  <SelectItem value="event">Event</SelectItem>
+                  <SelectItem value="holiday">Holiday</SelectItem>
+                  <SelectItem value="meeting">Meeting</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -217,62 +203,50 @@ const AnnouncementManager = () => {
       {/* Announcements List */}
       <Card>
         <CardHeader>
-          <CardTitle>Existing Announcements</CardTitle>
+          <CardTitle>Announcements</CardTitle>
         </CardHeader>
         <CardContent>
           {announcements.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No announcements found.</p>
+            <p className="text-gray-500 text-center py-8">No announcements found.</p>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {announcements.map((announcement) => (
-                  <TableRow key={announcement.id}>
-                    <TableCell className="font-medium">{announcement.title}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{announcement.category}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={announcement.type === 'urgent' ? 'destructive' : 'default'}>
-                        {announcement.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(announcement.created_at).toLocaleDateString()}
+            <div className="space-y-4">
+              {announcements.map((announcement) => (
+                <Card key={announcement.id} className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Megaphone className="h-4 w-4" />
+                        <h3 className="font-semibold">{announcement.title}</h3>
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                          {announcement.type}
+                        </span>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(announcement)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDelete(announcement.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                      <p className="text-gray-600 mb-2">{announcement.content}</p>
+                      <p className="text-xs text-gray-500">
+                        Category: {announcement.category} | 
+                        Created: {new Date(announcement.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(announcement)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleDelete(announcement.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
           )}
         </CardContent>
       </Card>

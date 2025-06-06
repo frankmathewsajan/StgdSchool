@@ -535,7 +535,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_admin_status: {
+        Args: { user_uuid?: string }
+        Returns: boolean
+      }
     }
     Enums: {
       emergency_status: "active" | "resolved" | "false_alarm"

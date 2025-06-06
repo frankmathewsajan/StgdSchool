@@ -19,6 +19,7 @@ export const useAuth = () => {
 
   const ensureAdminUser = async () => {
     try {
+      console.log("Ensuring admin user exists in database");
       // Create a dummy admin user entry if it doesn't exist
       const { error } = await supabase
         .from("admin_users")
@@ -30,7 +31,9 @@ export const useAuth = () => {
         });
       
       if (error) {
-        console.log("Admin user setup:", error);
+        console.log("Admin user setup error:", error);
+      } else {
+        console.log("Admin user setup successful");
       }
     } catch (error) {
       console.log("Admin user setup exception:", error);
@@ -39,6 +42,7 @@ export const useAuth = () => {
 
   const signIn = async (passkey: string) => {
     try {
+      console.log("Attempting admin sign in");
       if (passkey === "143143") {
         localStorage.setItem("adminAuthenticated", "true");
         setIsAuthenticated(true);
@@ -46,7 +50,7 @@ export const useAuth = () => {
         console.log("Admin login successful");
         return { success: true, error: null };
       } else {
-        console.log("Invalid passkey");
+        console.log("Invalid passkey provided");
         return { success: false, error: { message: "Invalid passkey" } };
       }
     } catch (error) {
@@ -57,6 +61,7 @@ export const useAuth = () => {
 
   const signOut = async () => {
     try {
+      console.log("Admin signing out");
       localStorage.removeItem("adminAuthenticated");
       setIsAuthenticated(false);
       console.log("Admin logout successful");
