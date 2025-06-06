@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -10,15 +11,38 @@ export const useAuth = () => {
     const adminLoggedIn = localStorage.getItem("adminAuthenticated");
     if (adminLoggedIn === "true") {
       setIsAuthenticated(true);
+      // Ensure admin user exists in database
+      ensureAdminUser();
     }
     setLoading(false);
   }, []);
+
+  const ensureAdminUser = async () => {
+    try {
+      // Create a dummy admin user entry if it doesn't exist
+      const { error } = await supabase
+        .from("admin_users")
+        .upsert({ 
+          user_id: "admin-user-id", 
+          role: "admin" 
+        }, { 
+          onConflict: "user_id" 
+        });
+      
+      if (error) {
+        console.log("Admin user setup:", error);
+      }
+    } catch (error) {
+      console.log("Admin user setup exception:", error);
+    }
+  };
 
   const signIn = async (passkey: string) => {
     try {
       if (passkey === "143143") {
         localStorage.setItem("adminAuthenticated", "true");
         setIsAuthenticated(true);
+        await ensureAdminUser();
         console.log("Admin login successful");
         return { success: true, error: null };
       } else {

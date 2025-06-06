@@ -1,238 +1,280 @@
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus } from "lucide-react";
-import { useSchoolLife } from "@/hooks/useSchoolLife";
-import { supabase } from "@/integrations/supabase/client";
+import { Plus, Edit, Trash2, Image as ImageIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useSchoolLife } from "@/hooks/useSchoolLife";
+import { useQueryClient } from "@tanstack/react-query";
 
 const GalleryManager = () => {
-  const { data: gallery, refetch } = useSchoolLife();
-  const { toast } = useToast();
-  const [isEditing, setIsEditing] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "general",
     image_url: "",
+    category: "general",
     date_taken: ""
   });
 
-  const handleSubmit = async (e: React.FormEvent, id?: string) => {
+  const { toast } = useToast();
+  const { data: gallery = [], refetch } = useSchoolLife();
+  const queryClient = useQueryClient();
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      image_url: "",
+      category: "general",
+      date_taken: ""
+    });
+    setEditingId(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setIsLoading(true);
+
     try {
-      if (id) {
+      console.log("Submitting gallery item:", formData);
+
+      const dataToSave = {
+        ...formData,
+        date_taken: formData.date_taken || null
+      };
+
+      if (editingId) {
         const { error } = await supabase
           .from("school_life_gallery")
-          .update(formData)
-          .eq("id", id);
-        
+          .update(dataToSave)
+          .eq("id", editingId);
+
         if (error) throw error;
-        toast({ title: "Gallery item updated successfully" });
+
+        toast({
+          title: "Success",
+          description: "Gallery item updated successfully",
+        });
       } else {
         const { error } = await supabase
           .from("school_life_gallery")
-          .insert([formData]);
-        
+          .insert([dataToSave]);
+
         if (error) throw error;
-        toast({ title: "Gallery item created successfully" });
+
+        toast({
+          title: "Success",
+          description: "Gallery item added successfully",
+        });
       }
-      
-      setIsEditing(null);
-      setIsCreating(false);
-      setFormData({ title: "", description: "", category: "general", image_url: "", date_taken: "" });
-      refetch();
-    } catch (error) {
-      toast({ 
-        title: "Error", 
-        description: "Failed to save gallery item", 
-        variant: "destructive" 
+
+      resetForm();
+      await refetch();
+      queryClient.invalidateQueries({ queryKey: ["school-life"] });
+    } catch (error: any) {
+      console.error("Save error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to save gallery item",
+        variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleEdit = (item: any) => {
+    setFormData({
+      title: item.title,
+      description: item.description || "",
+      image_url: item.image_url,
+      category: item.category,
+      date_taken: item.date_taken || ""
+    });
+    setEditingId(item.id);
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this gallery item?")) return;
-    
+
     try {
       const { error } = await supabase
         .from("school_life_gallery")
         .delete()
         .eq("id", id);
-      
+
       if (error) throw error;
-      toast({ title: "Gallery item deleted successfully" });
-      refetch();
-    } catch (error) {
-      toast({ 
-        title: "Error", 
-        description: "Failed to delete gallery item", 
-        variant: "destructive" 
+
+      toast({
+        title: "Success",
+        description: "Gallery item deleted successfully",
+      });
+
+      await refetch();
+      queryClient.invalidateQueries({ queryKey: ["school-life"] });
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete gallery item",
+        variant: "destructive",
       });
     }
   };
 
-  const startEdit = (item: any) => {
-    setFormData({
-      title: item.title,
-      description: item.description || "",
-      category: item.category,
-      image_url: item.image_url,
-      date_taken: item.date_taken || ""
-    });
-    setIsEditing(item.id);
-  };
-
-  const startCreate = () => {
-    setFormData({ title: "", description: "", category: "general", image_url: "", date_taken: "" });
-    setIsCreating(true);
-  };
-
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Manage Gallery</h3>
-        <Button onClick={startCreate} className="bg-[#7d0a0a] hover:bg-[#5d0808]">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Image
-        </Button>
-      </div>
-
-      {/* Create Form */}
-      {isCreating && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Add New Gallery Item</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={(e) => handleSubmit(e)} className="space-y-4">
-              <Input
-                placeholder="Title"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
-              />
-              <Textarea
-                placeholder="Description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-              <Input
-                placeholder="Image URL"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                required
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+      {/* Add/Edit Form */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            {editingId ? "Edit Gallery Item" : "Add New Gallery Item"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="title">Title</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Enter image title"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="academics">Academics</SelectItem>
-                    <SelectItem value="sports">Sports</SelectItem>
                     <SelectItem value="events">Events</SelectItem>
-                    <SelectItem value="campus">Campus</SelectItem>
+                    <SelectItem value="sports">Sports</SelectItem>
+                    <SelectItem value="academics">Academics</SelectItem>
+                    <SelectItem value="celebrations">Celebrations</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="image_url">Image URL</Label>
                 <Input
+                  id="image_url"
+                  value={formData.image_url}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  placeholder="Enter image URL"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="date_taken">Date Taken</Label>
+                <Input
+                  id="date_taken"
                   type="date"
                   value={formData.date_taken}
                   onChange={(e) => setFormData({ ...formData, date_taken: e.target.value })}
                 />
               </div>
-              <div className="flex space-x-2">
-                <Button type="submit" className="bg-[#7d0a0a] hover:bg-[#5d0808]">Save</Button>
-                <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>Cancel</Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+            </div>
+
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Enter image description"
+                rows={3}
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? "Saving..." : editingId ? "Update" : "Add"} Gallery Item
+              </Button>
+              {editingId && (
+                <Button type="button" variant="outline" onClick={resetForm}>
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Gallery Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {gallery?.map((item) => (
-          <Card key={item.id}>
-            <CardContent className="p-4">
-              {isEditing === item.id ? (
-                <form onSubmit={(e) => handleSubmit(e, item.id)} className="space-y-4">
-                  <Input
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                  />
-                  <Textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  />
-                  <Input
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    required
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general">General</SelectItem>
-                        <SelectItem value="academics">Academics</SelectItem>
-                        <SelectItem value="sports">Sports</SelectItem>
-                        <SelectItem value="events">Events</SelectItem>
-                        <SelectItem value="campus">Campus</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      type="date"
-                      value={formData.date_taken}
-                      onChange={(e) => setFormData({ ...formData, date_taken: e.target.value })}
+      <Card>
+        <CardHeader>
+          <CardTitle>Gallery Items</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {gallery.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">No gallery items found.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {gallery.map((item) => (
+                <Card key={item.id} className="overflow-hidden">
+                  <div className="aspect-video relative">
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "/placeholder.svg";
+                      }}
                     />
                   </div>
-                  <div className="flex space-x-2">
-                    <Button type="submit" size="sm" className="bg-[#7d0a0a] hover:bg-[#5d0808]">Save</Button>
-                    <Button type="button" size="sm" variant="outline" onClick={() => setIsEditing(null)}>Cancel</Button>
-                  </div>
-                </form>
-              ) : (
-                <div>
-                  <img src={item.image_url} alt={item.title} className="w-full h-32 object-cover rounded mb-2" />
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-medium text-sm">{item.title}</h4>
-                    <div className="flex space-x-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => startEdit(item)}
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => handleDelete(item.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-2">{item.title}</h3>
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
+                      {item.description}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {item.category}
+                      </span>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(item)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDelete(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                  {item.description && <p className="text-xs text-gray-600 mb-2">{item.description}</p>}
-                  <Badge variant="outline" className="text-xs">{item.category}</Badge>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
