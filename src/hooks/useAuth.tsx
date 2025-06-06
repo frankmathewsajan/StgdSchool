@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
-// The passcode should ideally be stored in environment variables or database
+// The passkey should ideally be stored in environment variables or database
 // For now, we'll keep it here but in a real app, move this to a secure storage
-const ADMIN_PASSCODE = "143143";
-const ALLOWED_ADMIN_DOMAINS = ["gmail.com"]; // Add your allowed domains here
+const ADMIN_PASSKEY = "143143";
+const ALLOWED_ADMIN_DOMAINS = ["gmail.com", "outlook.com", "hotmail.com"]; // Add your allowed domains here
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -82,18 +82,54 @@ export const useAuth = () => {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const signUp = async (email, password) => {
     try {
-      console.log("Starting Google sign in");
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+      console.log("Starting signup with email/password");
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
         options: {
-          redirectTo: `${window.location.origin}/admin/login`
+          emailRedirectTo: `${window.location.origin}/admin/login`
         }
       });
       
       if (error) {
-        console.error("Google sign in error:", error);
+        console.error("Signup error:", error);
+        toast({
+          title: "Signup Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { success: false, error };
+      }
+      
+      console.log("Signup initiated:", data);
+      toast({
+        title: "Signup Successful",
+        description: "Please check your email to confirm your account.",
+      });
+      return { success: true, error: null };
+    } catch (error) {
+      console.error("Signup exception:", error);
+      toast({
+        title: "Signup Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+      return { success: false, error };
+    }
+  };
+
+  const signIn = async (email, password) => {
+    try {
+      console.log("Starting sign in with email/password");
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        console.error("Sign in error:", error);
         toast({
           title: "Sign In Failed",
           description: error.message,
@@ -102,8 +138,8 @@ export const useAuth = () => {
         return { success: false, error };
       }
       
-      console.log("Google sign in initiated:", data);
-      return { success: true, error: null };
+      console.log("Sign in successful:", data);
+      return { success: true, error: null, user: data.user };
     } catch (error) {
       console.error("Login exception:", error);
       toast({
@@ -115,13 +151,13 @@ export const useAuth = () => {
     }
   };
 
-  const verifyPasscode = async (passcode) => {
+  const verifyPasskey = async (passkey) => {
     if (!user) {
       return { success: false, error: { message: "Not signed in" } };
     }
     
     try {
-      console.log("Verifying admin passcode");
+      console.log("Verifying admin passkey");
       
       // Check if email domain is allowed
       const emailDomain = user.email.split('@')[1];
@@ -135,18 +171,18 @@ export const useAuth = () => {
         };
       }
       
-      if (passcode === ADMIN_PASSCODE) {
-        console.log("Passcode verification successful");
+      if (passkey === ADMIN_PASSKEY) {
+        console.log("Passkey verification successful");
         localStorage.setItem("adminVerified", "true");
         setIsAuthenticated(true);
         await ensureAdminUser(user.id);
         return { success: true, error: null };
       } else {
-        console.log("Invalid passcode");
-        return { success: false, error: { message: "Invalid passcode" } };
+        console.log("Invalid passkey");
+        return { success: false, error: { message: "Invalid passkey" } };
       }
     } catch (error) {
-      console.error("Passcode verification error:", error);
+      console.error("Passkey verification error:", error);
       return { success: false, error: { message: "Verification failed" } };
     }
   };
@@ -171,12 +207,33 @@ export const useAuth = () => {
     }
   };
 
+  // Reset password functionality
+  const resetPassword = async (email) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/admin/reset-password`,
+      });
+
+      if (error) {
+        console.error("Password reset error:", error);
+        return { success: false, error };
+      }
+      
+      return { success: true, error: null };
+    } catch (error) {
+      console.error("Password reset exception:", error);
+      return { success: false, error: { message: "An unexpected error occurred" } };
+    }
+  };
+
   return {
     isAuthenticated,
     loading,
     user,
-    signInWithGoogle,
-    verifyPasscode,
+    signUp,
+    signIn,
+    verifyPasskey,
     signOut,
+    resetPassword,
   };
 };
