@@ -10,7 +10,7 @@ const AboutSection = () => {
     label: "Faculty",
     icon: BookOpen
   }, {
-    number: "35+",
+    number: "10+",
     label: "Years",
     icon: Award
   }, {

@@ -5,7 +5,7 @@ import { Mail, Phone } from "lucide-react";
 const Leadership = () => {
   const leaders = [
     {
-      name: "Dr. Margaret Johnson",
+      name: "Mr. Ashirwad Goyal",
       position: "Principal",
       image: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?auto=format&fit=crop&w=400&h=400",
       email: "principal@stgdconvent.edu",
@@ -128,7 +128,7 @@ const Leadership = () => {
             <CardContent className="p-8">
               <div className="text-center mb-6">
                 <h2 className="text-2xl font-bold text-[#7d0a0a] mb-2">Message from the Principal</h2>
-                <p className="text-gray-600">Dr. Margaret Johnson</p>
+                <p className="text-gray-600">Mr. Ashirwad Goyal</p>
               </div>
               <blockquote className="text-lg text-gray-700 italic leading-relaxed">
                 "At St. G. D. Convent School, we believe that every child has the potential to excel. 
@@ -138,7 +138,7 @@ const Leadership = () => {
                 the support and guidance they need to reach their full potential."
               </blockquote>
               <div className="text-right mt-4">
-                <p className="text-[#7d0a0a] font-semibold">- Dr. Margaret Johnson, Principal</p>
+                <p className="text-[#7d0a0a] font-semibold">- Mr. Ashirwad Goyal, Principal</p>
               </div>
             </CardContent>
           </Card>

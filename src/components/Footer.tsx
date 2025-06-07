@@ -84,16 +84,15 @@ const Footer = () => {
             <div className="space-y-3 text-red-200">
               <p>
                 <strong className="text-white">Address:</strong><br />
-                123 Education Street<br />
-                Academic City, AC 12345
+                Siroli, Road Dhanouli,<br></br>Agra, Uttar Pradesh
               </p>
               <p>
                 <strong className="text-white">Phone:</strong><br />
-                +1 (555) 123-4567
+                8077422014<br></br>9084792142
               </p>
               <p>
                 <strong className="text-white">Email:</strong><br />
-                info@stgdconvent.edu
+                st.g.dconventschool1@gmail.com
               </p>
             </div>
           </div>

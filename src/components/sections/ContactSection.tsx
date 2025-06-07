@@ -19,7 +19,7 @@ const ContactSection = () => {
           <div>
             <h3 className="text-2xl font-bold text-gray-900 mb-6">Get In Touch</h3>
             
-            <div className="space-y-6">
+            <div className="space-y-4">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
@@ -29,9 +29,7 @@ const ContactSection = () => {
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-1">Address</h4>
                       <p className="text-gray-600">
-                        123 Education Street<br />
-                        Academic City, AC 12345<br />
-                        United States
+                      Siroli, Road Dhanouli,<br></br>Agra, Uttar Pradesh
                       </p>
                     </div>
                   </div>
@@ -47,8 +45,8 @@ const ContactSection = () => {
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-1">Phone</h4>
                       <p className="text-gray-600">
-                        Main Office: +1 (555) 123-4567<br />
-                        Admissions: +1 (555) 123-4568
+                        Main Office: 8077422014<br />
+                        Admissions: 9084792142
                       </p>
                     </div>
                   </div>
@@ -64,8 +62,8 @@ const ContactSection = () => {
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-1">Email</h4>
                       <p className="text-gray-600">
-                        General: info@stgdconvent.edu<br />
-                        Admissions: admissions@stgdconvent.edu
+                        General: st.g.dconventschool1@gmail.com<br />
+                        Admissions: st.g.dconventschool1@gmail.com
                       </p>
                     </div>
                   </div>
