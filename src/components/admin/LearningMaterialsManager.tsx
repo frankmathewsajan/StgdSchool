@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,19 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useLearningMaterials } from "@/hooks/useLearningMaterials";
 import { useQueryClient } from "@tanstack/react-query";
+
+interface LearningMaterial {
+  id: string;
+  title: string;
+  description: string;
+  subject: string;
+  class_level: string;
+  file_type: string;
+  file_size: string;
+  file_url: string;
+  downloads: number;
+  created_at: string;
+}
 
 const LearningMaterialsManager = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,8 +58,6 @@ const LearningMaterialsManager = () => {
     setIsLoading(true);
 
     try {
-      console.log("Submitting learning material:", formData);
-
       if (editingId) {
         const { error } = await supabase
           .from("learning_materials")
@@ -74,13 +84,15 @@ const LearningMaterialsManager = () => {
       }
 
       resetForm();
+      // Invalidate the cache first
+      await queryClient.invalidateQueries({ queryKey: ["learning-materials"] });
+      // Then refetch
       await refetch();
-      queryClient.invalidateQueries({ queryKey: ["learning-materials"] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Save error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save learning material",
+        description: error instanceof Error ? error.message : "Failed to save learning material",
         variant: "destructive",
       });
     } finally {
@@ -88,7 +100,7 @@ const LearningMaterialsManager = () => {
     }
   };
 
-  const handleEdit = (material: any) => {
+  const handleEdit = (material: LearningMaterial) => {
     setFormData({
       title: material.title,
       description: material.description || "",
@@ -117,13 +129,15 @@ const LearningMaterialsManager = () => {
         description: "Learning material deleted successfully",
       });
 
+      // Invalidate the cache first
+      await queryClient.invalidateQueries({ queryKey: ["learning-materials"] });
+      // Then refetch
       await refetch();
-      queryClient.invalidateQueries({ queryKey: ["learning-materials"] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Delete error:", error);
       toast({
         title: "Error",
-        description: "Failed to delete learning material",
+        description: error instanceof Error ? error.message : "Failed to delete learning material",
         variant: "destructive",
       });
     }

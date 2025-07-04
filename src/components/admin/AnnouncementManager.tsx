@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,15 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { useQueryClient } from "@tanstack/react-query";
+
+interface Announcement {
+  id: string;
+  title: string;
+  content: string;
+  type: string;
+  category: string;
+  created_at: string;
+}
 
 const AnnouncementManager = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -41,26 +49,55 @@ const AnnouncementManager = () => {
     setIsLoading(true);
 
     try {
-      console.log("Submitting announcement:", formData);
+      // Log the data being submitted
+      console.log("Submitting announcement data:", {
+        editingId,
+        formData,
+        isEdit: !!editingId
+      });
 
       if (editingId) {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("announcements")
           .update(formData)
-          .eq("id", editingId);
+          .eq("id", editingId)
+          .select()
+          .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Update error details:", {
+            error,
+            code: error.code,
+            message: error.message,
+            details: error.details
+          });
+          throw error;
+        }
+
+        console.log("Update successful:", data);
 
         toast({
           title: "Success",
           description: "Announcement updated successfully",
         });
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("announcements")
-          .insert([formData]);
+          .insert([formData])
+          .select()
+          .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Insert error details:", {
+            error,
+            code: error.code,
+            message: error.message,
+            details: error.details
+          });
+          throw error;
+        }
+
+        console.log("Insert successful:", data);
 
         toast({
           title: "Success", 
@@ -69,13 +106,23 @@ const AnnouncementManager = () => {
       }
 
       resetForm();
+      // Invalidate the cache first
+      await queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      // Then refetch
       await refetch();
-      queryClient.invalidateQueries({ queryKey: ["announcements"] });
-    } catch (error: any) {
-      console.error("Save error:", error);
+    } catch (error) {
+      console.error("Save error details:", {
+        error,
+        isError: error instanceof Error,
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
       toast({
         title: "Error",
-        description: error.message || "Failed to save announcement",
+        description: error instanceof Error 
+          ? `Failed to save announcement: ${error.message}`
+          : "Failed to save announcement. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -83,7 +130,7 @@ const AnnouncementManager = () => {
     }
   };
 
-  const handleEdit = (announcement: any) => {
+  const handleEdit = (announcement: Announcement) => {
     setFormData({
       title: announcement.title,
       content: announcement.content,
@@ -109,13 +156,15 @@ const AnnouncementManager = () => {
         description: "Announcement deleted successfully",
       });
 
+      // Invalidate the cache first
+      await queryClient.invalidateQueries({ queryKey: ["announcements"] });
+      // Then refetch
       await refetch();
-      queryClient.invalidateQueries({ queryKey: ["announcements"] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Delete error:", error);
       toast({
         title: "Error",
-        description: "Failed to delete announcement",
+        description: error instanceof Error ? error.message : "Failed to delete announcement",
         variant: "destructive",
       });
     }

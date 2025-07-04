@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,19 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useLeadership } from "@/hooks/useLeadership";
 import { useQueryClient } from "@tanstack/react-query";
+
+interface LeadershipMember {
+  id: string;
+  name: string;
+  position: string;
+  bio: string;
+  qualifications: string;
+  email: string;
+  phone: string;
+  image_url: string;
+  display_order: number;
+  created_at: string;
+}
 
 const LeadershipManager = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -48,8 +60,6 @@ const LeadershipManager = () => {
     setIsLoading(true);
 
     try {
-      console.log("Submitting leadership member:", formData);
-
       const dataToSave = {
         ...formData,
         display_order: parseInt(formData.display_order.toString()) || 0
@@ -81,13 +91,15 @@ const LeadershipManager = () => {
       }
 
       resetForm();
+      // Invalidate the cache first
+      await queryClient.invalidateQueries({ queryKey: ["leadership"] });
+      // Then refetch
       await refetch();
-      queryClient.invalidateQueries({ queryKey: ["leadership"] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Save error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save leadership member",
+        description: error instanceof Error ? error.message : "Failed to save leadership member",
         variant: "destructive",
       });
     } finally {
@@ -95,7 +107,7 @@ const LeadershipManager = () => {
     }
   };
 
-  const handleEdit = (member: any) => {
+  const handleEdit = (member: LeadershipMember) => {
     setFormData({
       name: member.name,
       position: member.position,
@@ -125,13 +137,15 @@ const LeadershipManager = () => {
         description: "Leadership member deleted successfully",
       });
 
+      // Invalidate the cache first
+      await queryClient.invalidateQueries({ queryKey: ["leadership"] });
+      // Then refetch
       await refetch();
-      queryClient.invalidateQueries({ queryKey: ["leadership"] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Delete error:", error);
       toast({
         title: "Error",
-        description: "Failed to delete leadership member",
+        description: error instanceof Error ? error.message : "Failed to delete leadership member",
         variant: "destructive",
       });
     }

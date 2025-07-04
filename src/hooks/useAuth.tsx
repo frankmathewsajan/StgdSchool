@@ -62,23 +62,38 @@ export const useAuth = () => {
   const ensureAdminUser = async (userId) => {
     try {
       console.log("Ensuring admin user exists in database");
-      // Create a dummy admin user entry if it doesn't exist
-      const { error } = await supabase
-        .from("admin_users")
-        .upsert({ 
-          user_id: userId, 
-          role: "admin" 
-        }, { 
-          onConflict: "user_id" 
-        });
       
-      if (error) {
-        console.log("Admin user setup error:", error);
-      } else {
-        console.log("Admin user setup successful");
+      // First check if the admin user already exists
+      const { data: existingAdmin, error: checkError } = await supabase
+        .from("admin_users")
+        .select("id")
+        .eq("user_id", userId)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+        console.error("Error checking admin user:", checkError);
+        return;
       }
+
+      // If admin user doesn't exist, create it
+      if (!existingAdmin) {
+        const { error: insertError } = await supabase
+          .from("admin_users")
+          .insert({ 
+            user_id: userId, 
+            role: "admin",
+            created_at: new Date().toISOString()
+          });
+
+        if (insertError) {
+          console.error("Error creating admin user:", insertError);
+          return;
+        }
+      }
+
+      console.log("Admin user setup successful");
     } catch (error) {
-      console.log("Admin user setup exception:", error);
+      console.error("Admin user setup exception:", error);
     }
   };
 

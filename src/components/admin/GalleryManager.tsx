@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,16 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchoolLife } from "@/hooks/useSchoolLife";
 import { useQueryClient } from "@tanstack/react-query";
+
+interface GalleryItem {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string;
+  category: string;
+  date_taken: string;
+  created_at: string;
+}
 
 const GalleryManager = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -43,8 +52,6 @@ const GalleryManager = () => {
     setIsLoading(true);
 
     try {
-      console.log("Submitting gallery item:", formData);
-
       const dataToSave = {
         ...formData,
         date_taken: formData.date_taken || null
@@ -76,13 +83,15 @@ const GalleryManager = () => {
       }
 
       resetForm();
+      // Invalidate the cache first
+      await queryClient.invalidateQueries({ queryKey: ["school-life"] });
+      // Then refetch
       await refetch();
-      queryClient.invalidateQueries({ queryKey: ["school-life"] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Save error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to save gallery item",
+        description: error instanceof Error ? error.message : "Failed to save gallery item",
         variant: "destructive",
       });
     } finally {
@@ -90,7 +99,7 @@ const GalleryManager = () => {
     }
   };
 
-  const handleEdit = (item: any) => {
+  const handleEdit = (item: GalleryItem) => {
     setFormData({
       title: item.title,
       description: item.description || "",
@@ -117,13 +126,15 @@ const GalleryManager = () => {
         description: "Gallery item deleted successfully",
       });
 
+      // Invalidate the cache first
+      await queryClient.invalidateQueries({ queryKey: ["school-life"] });
+      // Then refetch
       await refetch();
-      queryClient.invalidateQueries({ queryKey: ["school-life"] });
-    } catch (error: any) {
+    } catch (error) {
       console.error("Delete error:", error);
       toast({
         title: "Error",
-        description: "Failed to delete gallery item",
+        description: error instanceof Error ? error.message : "Failed to delete gallery item",
         variant: "destructive",
       });
     }
